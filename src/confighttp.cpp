@@ -725,9 +725,9 @@ namespace confighttp {
     pt::ptree outputTree;
     outputTree.put("status", true);
     outputTree.put("platform", SUNSHINE_PLATFORM);
-    outputTree.put("version", PROJECT_VER);Add commentMore actions
+    outputTree.put("version", PROJECT_VER);
     outputTree.put("build_type", BUILD_TYPE);
-    
+
     auto vars = config::parse_config(file_handler::read_file(config::sunshine.config_file.c_str()));
 
     for (auto &[name, value] : vars) {
