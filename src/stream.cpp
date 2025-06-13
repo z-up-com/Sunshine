@@ -575,6 +575,7 @@ namespace stream {
         case ENET_EVENT_TYPE_DISCONNECT:
           BOOST_LOG(info) << "CLIENT DISCONNECTED"sv;
           // No more clients to send video data to ^_^
+          display_cursor = true; // for andorid & ios, temp solution 
           if (session->state == session::state_e::RUNNING) {
             session::stop(*session);
           }

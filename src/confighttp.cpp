@@ -725,14 +725,14 @@ namespace confighttp {
     pt::ptree outputTree;
     outputTree.put("status", true);
     outputTree.put("platform", SUNSHINE_PLATFORM);
-    outputTree.put("version", PROJECT_VER);
+    outputTree.put("release_version", PROJECT_VER);
 
     auto vars = config::parse_config(file_handler::read_file(config::sunshine.config_file.c_str()));
 
     for (auto &[name, value] : vars) {
       outputTree.put(std::move(name), std::move(value));
     }
-
+    output_tree["display_cursor"]=display_cursor;
     send_response(response, outputTree);
   }
 
@@ -784,6 +784,7 @@ namespace confighttp {
       pt::ptree inputTree;
       pt::ptree outputTree;
       pt::read_json(ss, inputTree);
+      std::string origin_encoder = {};
       for (const auto &[k, v] : inputTree) {
         std::string value = inputTree.get<std::string>(k);
         if (value.length() == 0 || value.compare("null") == 0) {
@@ -791,9 +792,14 @@ namespace confighttp {
         }
 
         configStream << k << " = " << value << std::endl;
+        if (k == "encoder" && v.is_string()) {
+            origin_encoder = v;
+        }
       }
       file_handler::write_file(config::sunshine.config_file.c_str(), configStream.str());
       outputTree.put("status", true);
+      config::video.encoder = origin_encoder;
+      BOOST_LOG(warning) << "Encoder swtich to ["sv << config::video.encoder << ']';
       send_response(response, outputTree);
     } catch (std::exception &e) {
       BOOST_LOG(warning) << "SaveConfig: "sv << e.what();
