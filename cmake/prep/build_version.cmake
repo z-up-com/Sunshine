@@ -1,3 +1,4 @@
+add_compile_definitions(BUILD_TYPE=ENV{BUILD_TYPE})
 # Check if env vars are defined before attempting to access them, variables will be defined even if blank
 if((DEFINED ENV{BRANCH}) AND (DEFINED ENV{BUILD_VERSION}) AND (DEFINED ENV{COMMIT}))  # cmake-lint: disable=W0106
     if(($ENV{BRANCH} STREQUAL "master") AND (NOT $ENV{BUILD_VERSION} STREQUAL ""))
