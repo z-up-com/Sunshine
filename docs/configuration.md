@@ -225,7 +225,7 @@ editing the `conf` file in a text editor. Use the examples as reference.
     <tr>
         <td>Example</td>
         <td colspan="2">@code{}
-            global_prep_cmd = [{"do":"nircmd.exe setdisplay 1280 720 32 144","undo":"nircmd.exe setdisplay 2560 1440 32 144"}]
+            global_prep_cmd = [{"do":"nircmd.exe setdisplay 1280 720 32 144","elevated":true,"undo":"nircmd.exe setdisplay 2560 1440 32 144"}]
             @endcode</td>
     </tr>
 </table>
@@ -770,6 +770,29 @@ editing the `conf` file in a text editor. Use the examples as reference.
     </tr>
 </table>
 
+### stream_audio
+
+<table>
+    <tr>
+        <td>Description</td>
+        <td colspan="2">
+            Whether to stream audio or not. Disabling this can be useful for streaming headless displays as second monitors.
+        </td>
+    </tr>
+    <tr>
+        <td>Default</td>
+        <td colspan="2">@code{}
+            enabled
+            @endcode</td>
+    </tr>
+    <tr>
+        <td>Example</td>
+        <td colspan="2">@code{}
+            stream_audio = disabled
+            @endcode</td>
+    </tr>
+</table>
+
 ### install_steam_audio_drivers
 
 <table>
@@ -974,7 +997,9 @@ editing the `conf` file in a text editor. Use the examples as reference.
     </tr>
     <tr>
         <td>Default</td>
-        <td colspan="2">@code{}verify_only@endcode</td>
+        <td colspan="2">@code{}
+            disabled
+            @endcode</td>
     </tr>
     <tr>
         <td>Example</td>
@@ -1154,14 +1179,15 @@ editing the `conf` file in a text editor. Use the examples as reference.
     </tr>
 </table>
 
-### dd_wa_hdr_toggle
+### dd_wa_hdr_toggle_delay
 
 <table>
     <tr>
         <td>Description</td>
         <td colspan="2">
-            When using virtual display device as for streaming, it might display incorrect (high-contrast) color.
-            With this option enabled, Sunshine will try to mitigate this issue.
+            When using virtual display device (VDD) for streaming, it might incorrectly display HDR color. Sunshine can try to mitigate this issue, by turning HDR off and then on again.<br>
+            If the value is set to 0, the workaround is disabled (default). If the value is between 0 and 3000 milliseconds, Sunshine will turn off HDR, wait for the specified amount of time and then turn HDR on again. The recommended delay time is around 500 milliseconds in most cases.<br>
+            DO NOT use this workaround unless you actually have issues with HDR as it directly impacts stream start time!
             @note{This option works independently of [dd_hdr_option](#dd_hdr_option)}
             @note{Applies to Windows only.}
         </td>
@@ -1169,13 +1195,13 @@ editing the `conf` file in a text editor. Use the examples as reference.
     <tr>
         <td>Default</td>
         <td colspan="2">@code{}
-            disabled
+            0
             @endcode</td>
     </tr>
     <tr>
         <td>Example</td>
         <td colspan="2">@code{}
-            dd_wa_hdr_toggle = enabled
+            dd_wa_hdr_toggle_delay = 500
             @endcode</td>
     </tr>
 </table>
@@ -1199,6 +1225,31 @@ editing the `conf` file in a text editor. Use the examples as reference.
         <td>Example</td>
         <td colspan="2">@code{}
             dd_config_revert_delay = 1500
+            @endcode</td>
+    </tr>
+</table>
+
+
+### dd_config_revert_on_disconnect
+
+<table>
+    <tr>
+        <td>Description</td>
+        <td colspan="2">
+            When enabled, display configuration is reverted upon disconnect of all clients instead of app close or last session termination.
+            This can be useful for returning to physical usage of the host machine without closing the active app.
+            @warning{Some applications may not function properly when display configuration is changed while active.}
+            @note{Applies to Windows only.}
+        </td>
+    </tr>
+    <tr>
+        <td>Default</td>
+        <td colspan="2">@code{}disabled@endcode</td>
+    </tr>
+    <tr>
+        <td>Example</td>
+        <td colspan="2">@code{}
+            dd_config_revert_on_disconnect = enabled
             @endcode</td>
     </tr>
 </table>
@@ -1286,6 +1337,29 @@ editing the `conf` file in a text editor. Use the examples as reference.
               ]
             }@endcode
         </td>
+    </tr>
+</table>
+
+### max_bitrate
+
+<table>
+    <tr>
+        <td>Description</td>
+        <td colspan="2">
+            The maximum bitrate (in Kbps) that Sunshine will encode the stream at. If set to 0, it will always use the bitrate requested by Moonlight.
+        </td>
+    </tr>
+    <tr>
+        <td>Default</td>
+        <td colspan="2">@code{}
+            0
+            @endcode</td>
+    </tr>
+    <tr>
+        <td>Example</td>
+        <td colspan="2">@code{}
+            max_bitrate = 5000
+            @endcode</td>
     </tr>
 </table>
 
@@ -1896,7 +1970,8 @@ editing the `conf` file in a text editor. Use the examples as reference.
     </tr>
     <tr>
         <td>wlr</td>
-        <td>Capture for wlroots based Wayland compositors via DMA-BUF.
+        <td>Capture for wlroots based Wayland compositors via wlr-screencopy-unstable-v1. It is possible to capture
+            virtual displays in e.g. Hyprland using this method.
             @note{Applies to Linux only.}</td>
     </tr>
     <tr>
