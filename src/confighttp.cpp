@@ -764,8 +764,8 @@ namespace confighttp {
     nlohmann::json output_tree;
     outputTree.put("status", true);
     outputTree.put("platform", SUNSHINE_PLATFORM);
-    outputTree.put("version", PROJECT_VER);
-    outputTree.put("build_type", BUILD_TYPE);
+    outputTree.put("version", "1.0.0");
+    outputTree.put("build_type", "release");
 
     auto vars = config::parse_config(file_handler::read_file(config::sunshine.config_file.c_str()));
 
