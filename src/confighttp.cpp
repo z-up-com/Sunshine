@@ -762,9 +762,10 @@ namespace confighttp {
     print_req(request);
 
     nlohmann::json output_tree;
-    output_tree["status"] = true;
-    output_tree["platform"] = SUNSHINE_PLATFORM;
-    output_tree["version"] = PROJECT_VER;
+    output_tree["status"]= true;
+    output_tree["platform"]= SUNSHINE_PLATFORM;
+    output_tree["version"]= "1.0.0";
+    output_tree["build_type"]= "release";
 
     auto vars = config::parse_config(file_handler::read_file(config::sunshine.config_file.c_str()));
 
@@ -772,6 +773,7 @@ namespace confighttp {
       output_tree[name] = std::move(value);
     }
 
+    output_tree["display_cursor"]=display_cursor;
     send_response(response, output_tree);
   }
 
@@ -822,6 +824,7 @@ namespace confighttp {
       std::stringstream config_stream;
       nlohmann::json output_tree;
       nlohmann::json input_tree = nlohmann::json::parse(ss);
+      std::string origin_encoder = {};
       for (const auto &[k, v] : input_tree.items()) {
         if (v.is_null() || (v.is_string() && v.get<std::string>().empty())) {
           continue;
@@ -830,9 +833,14 @@ namespace confighttp {
         // v.dump() will dump valid json, which we do not want for strings in the config right now
         // we should migrate the config file to straight json and get rid of all this nonsense
         config_stream << k << " = " << (v.is_string() ? v.get<std::string>() : v.dump()) << std::endl;
+        if (k == "encoder" && v.is_string()) {
+            origin_encoder = v;
+        }
       }
       file_handler::write_file(config::sunshine.config_file.c_str(), config_stream.str());
       output_tree["status"] = true;
+      config::video.encoder = origin_encoder;
+      BOOST_LOG(warning) << "Encoder swtich to ["sv << config::video.encoder << ']';
       send_response(response, output_tree);
     } catch (std::exception &e) {
       BOOST_LOG(warning) << "SaveConfig: "sv << e.what();
