@@ -762,10 +762,10 @@ namespace confighttp {
     print_req(request);
 
     nlohmann::json output_tree;
-    outputTree.put("status", true);
-    outputTree.put("platform", SUNSHINE_PLATFORM);
-    outputTree.put("version", "1.0.0");
-    outputTree.put("build_type", "release");
+    output_tree["status"]= true;
+    outputTree["platform"]= SUNSHINE_PLATFORM;
+    outputTree["version"]= "1.0.0";
+    outputTree["build_type"]= "release";
 
     auto vars = config::parse_config(file_handler::read_file(config::sunshine.config_file.c_str()));
 
@@ -774,7 +774,7 @@ namespace confighttp {
     }
 
     output_tree["display_cursor"]=display_cursor;
-    send_response(response, outputTree);
+    send_response(response, output_tree);
   }
 
   /**
