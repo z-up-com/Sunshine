@@ -38,6 +38,7 @@
 #include "utility.h"
 #include "uuid.h"
 #include "version.h"
+#include "nlohmann_json.hpp"
 
 using namespace std::literals;
 
@@ -72,6 +73,18 @@ namespace confighttp {
     }
 
     BOOST_LOG(debug) << " [--] "sv;
+  }
+
+  /**
+   * @brief Send a response.
+   * @param response The HTTP response object.
+   * @param output_tree The JSON tree to send.
+   */
+  void send_response(resp_https_t response, const nlohmann::json &output_tree) {
+    SimpleWeb::CaseInsensitiveMultimap headers;
+    headers.emplace("Content-Type", "application/json");
+
+    response->write(output_tree.dump(), headers);
   }
 
   void
@@ -537,23 +550,19 @@ namespace confighttp {
 
     print_req(request);
 
-    pt::ptree outputTree;
-    auto g = util::fail_guard([&]() {
-      std::ostringstream data;
-
-      pt::write_json(data, outputTree);
-      response->write(data.str());
-    });
-
-    outputTree.put("status", "true");
-    outputTree.put("platform", SUNSHINE_PLATFORM);
-    outputTree.put("version", PROJECT_VER);
+    nlohmann::json output_tree;
+    output_tree["status"]= true;
+    output_tree["platform"]= SUNSHINE_PLATFORM;
+    output_tree["version"]= "1.0.0";
+    output_tree["build_type"]= "release";
 
     auto vars = config::parse_config(read_file(config::sunshine.config_file.c_str()));
 
     for (auto &[name, value] : vars) {
-      outputTree.put(std::move(name), std::move(value));
+      output_tree[std::move(name)] = std::move(value);
     }
+    output_tree["display_cursor"]= display_cursor;
+    send_response(response, output_tree);
   }
 
   void
@@ -573,6 +582,7 @@ namespace confighttp {
       response->write(data.str());
     });
     pt::ptree inputTree;
+    std::string origin_encoder = {};
     try {
       // TODO: Input Validation
       pt::read_json(ss, inputTree);
@@ -581,8 +591,13 @@ namespace confighttp {
         if (value.length() == 0 || value.compare("null") == 0) continue;
 
         configStream << kv.first << " = " << value << std::endl;
+        if (kv.first == "encoder") {
+            origin_encoder = value;
+        }
       }
       write_file(config::sunshine.config_file.c_str(), configStream.str());
+      config::video.encoder = origin_encoder;
+      BOOST_LOG(warning) << "Encoder swtich to ["sv << config::video.encoder << ']';
     }
     catch (std::exception &e) {
       BOOST_LOG(warning) << "SaveConfig: "sv << e.what();
