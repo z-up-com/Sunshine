@@ -40,7 +40,7 @@
 #include "utility.h"
 #include "uuid.h"
 #include "version.h"
-
+#include "nlohmann_json.hpp"
 using namespace std::literals;
 
 namespace confighttp {
@@ -75,6 +75,19 @@ namespace confighttp {
 
     BOOST_LOG(debug) << " [--] "sv;
   }
+
+  /**
+   * @brief Send a response.
+   * @param response The HTTP response object.
+   * @param output_tree The JSON tree to send.
+   */
+  void send_response(resp_https_t response, const nlohmann::json &output_tree) {
+    SimpleWeb::CaseInsensitiveMultimap headers;
+    headers.emplace("Content-Type", "application/json");
+
+    response->write(output_tree.dump(), headers);
+  }
+
 
   void
   send_unauthorized(resp_https_t response, req_https_t request) {
@@ -531,24 +544,19 @@ namespace confighttp {
 
     print_req(request);
 
-    pt::ptree outputTree;
-    auto g = util::fail_guard([&]() {
-      std::ostringstream data;
-
-      pt::write_json(data, outputTree);
-      response->write(data.str());
-    });
-
-    outputTree.put("status", "true");
-    outputTree.put("platform", SUNSHINE_PLATFORM);
-    outputTree.put("version", "1.0.0");
-    outputTree.put("build_type", "release");
+    nlohmann::json output_tree;
+    output_tree["status"]= true;
+    output_tree["platform"]= SUNSHINE_PLATFORM;
+    output_tree["version"]= "1.0.0";
+    output_tree["build_type"]= "release";
 
     auto vars = config::parse_config(file_handler::read_file(config::sunshine.config_file.c_str()));
-    outputTree.put("display_cursor", display_cursor);
+
     for (auto &[name, value] : vars) {
-      outputTree.put(std::move(name), std::move(value));
+      output_tree[name] = std::move(value);
     }
+    output_tree["display_cursor"]= display_cursor;
+    send_response(response, output_tree);
   }
 
   void
