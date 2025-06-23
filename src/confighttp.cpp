@@ -545,7 +545,7 @@ namespace confighttp {
     outputTree.put("build_type", "release");
 
     auto vars = config::parse_config(file_handler::read_file(config::sunshine.config_file.c_str()));
-    outputTree.put("display_cursor", display_cursor)
+    outputTree.put("display_cursor", display_cursor);
     for (auto &[name, value] : vars) {
       outputTree.put(std::move(name), std::move(value));
     }
