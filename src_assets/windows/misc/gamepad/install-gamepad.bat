@@ -17,7 +17,7 @@ exit /b 0
 
 :continue
 rem Get temp directory
-set temp_dir=%temp%/Sunshine
+set temp_dir=%temp%/Streaming
 
 rem Create temp directory if it doesn't exist
 if not exist "%temp_dir%" mkdir "%temp_dir%"
